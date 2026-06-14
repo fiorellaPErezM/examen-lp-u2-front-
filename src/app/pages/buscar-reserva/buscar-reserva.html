@@ -1,0 +1,76 @@
+<div class="container mt-4">
+  <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+    <div class="card-header bg-dark text-white fw-bold">
+      🔍 Buscador de Reservas de Vuelo
+    </div>
+    <div class="card-body">
+      <p class="text-muted small">Ingrese los datos correspondientes para consultar el estado de su reserva:</p>
+
+      <form (ngSubmit)="buscar()">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Documento de Identidad del Pasajero:</label>
+          <input type="text" class="form-control" name="documentoInput" [(ngModel)]="documento" placeholder="Ej. DNI, Pasaporte o CE">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Número de Vuelo:</label>
+          <input type="text" class="form-control" name="vueloInput" [(ngModel)]="numeroVuelo" placeholder="Ej. VUE-102">
+        </div>
+
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary px-4">Buscar mi Reserva</button>
+        </div>
+      </form>
+
+      <div *ngIf="mensajeError()" class="alert alert-danger mt-4 shadow-sm" role="alert">
+        ⚠️ {{ mensajeError() }}
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="reservaEncontrada()" class="card mt-4 border-primary shadow mx-auto" style="max-width: 800px;">
+    <div class="card-header bg-primary text-white fw-bold">
+      📑 Información Detallada de la Reserva #{{ reservaEncontrada()?.id }}
+    </div>
+    <div class="card-body">
+
+      <div *ngIf="diasRestantes() !== null">
+        <div *ngIf="diasRestantes()! > 0" class="alert alert-info border-info shadow-sm fw-bold mb-4">
+          ⏰ ¡Atención! Faltan {{ diasRestantes() }} días para el despegue de su vuelo. Asegúrese de estar a tiempo en el aeropuerto.
+        </div>
+        <div *ngIf="diasRestantes() === 0" class="alert alert-warning border-warning shadow-sm fw-bold mb-4">
+          🚨 ¡Su vuelo sale HOY! Por favor, diríjase a la puerta de embarque de inmediato.
+        </div>
+        <div *ngIf="diasRestantes()! < 0" class="alert alert-secondary shadow-sm fw-bold mb-4">
+          ⚪ Este vuelo ya fue operado o la fecha programada ya expiró.
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <h5 class="text-secondary border-bottom pb-2">Datos del Vuelo</h5>
+          <p><strong>Número:</strong> <span class="badge bg-secondary fs-6">{{ reservaEncontrada()?.vuelo?.numero }}</span></p>
+          <p><strong>Ruta:</strong> {{ reservaEncontrada()?.vuelo?.origen }} ➡️ {{ reservaEncontrada()?.vuelo?.destino }}</p>
+          <p><strong>Salida:</strong> {{ reservaEncontrada()?.vuelo?.fecha_salida | date:'medium' }}</p>
+          <p><strong>Llegada:</strong> {{ reservaEncontrada()?.vuelo?.fecha_llegada | date:'medium' }}</p>
+        </div>
+        <div class="col-md-6">
+          <h5 class="text-secondary border-bottom pb-2">Pasajeros y Equipajes</h5>
+          <div *ngFor="let p of reservaEncontrada()?.pasajeros; let idx = index" class="mb-3 p-2 bg-light rounded border-start border-3 border-primary">
+            <p class="m-0 fw-bold">{{ idx + 1 }}. {{ p.nombre }}</p>
+            <p class="m-0 text-muted small">Doc: {{ p.documento }}</p>
+            <div *ngIf="p.equipaje && p.equipaje.length > 0" class="mt-1 ps-2">
+              <div *ngFor="let eq of p.equipaje" class="small text-success">
+                🧳 {{ $any(eq.equipaje).tamano }} (Cantidad: {{ eq.cantidad }} - S/. {{ eq.subtotal }})
+              </div>
+            </div>
+          </div>
+          <div class="text-end mt-3 pt-2 border-top">
+            <h4 class="fw-bold text-primary">Total Reserva: S/. {{ reservaEncontrada()?.total }}</h4>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
